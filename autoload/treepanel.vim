@@ -39,10 +39,10 @@ enddef
 
 def AlignRight(s: string): string
   if s->strdisplaywidth() <= state.width
-     return s
+    return s
   else
-     const p = (s->strdisplaywidth() - state.width)
-     return s->substitute($'.*\%{p}v', '<', '')
+    const p = (s->strdisplaywidth() - state.width)
+    return s->substitute($'.*\%{p}v', '<', '')
   endif
 enddef
 
@@ -78,7 +78,7 @@ def GetDirInfo(): any
     endif
   endfor
   if empty(root)
-    root = expand('/')
+    root = curdir->substitute('\([/\\]\).*', '\1', '')
   endif
   cache.root = root
 
