@@ -285,8 +285,6 @@ def KeyHook(w: number, key: string): bool
     if 0 < state.cursor
       state.cursor -= 1
       Update()
-    else
-      OpenParent()
     endif
     return true
   elseif key ==# 'j'
@@ -322,7 +320,9 @@ def KeyHookSearch(key: string): bool
     return true
   elseif key ==# "\<BS>"
     if !state.search
-      return false
+      state.search_focused = false
+      Refresh()
+      return true
     else
       state.search = state.search->substitute('.$', '', '')
     endif
