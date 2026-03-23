@@ -14,7 +14,7 @@ silent! packadd nerdfont.vim
 
 # field {{{
 const default = {
-  rootmakers: ['.git', 'pacckage.json', '.svn', 'go.mod', 'Cargo.toml'],
+  rootmakers: ['.git', 'package.json', '.svn', 'go.mod', 'Cargo.toml'],
   diricon: "\ue5fe",
   ellipsis: '︙',
   maxheight: 0,
