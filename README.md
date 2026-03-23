@@ -1,6 +1,14 @@
+## vim-treepanel
+
+<img width="608" height="406" alt="image" src="https://github.com/user-attachments/assets/4b06d0b9-667f-41f9-a9f1-fec0d0511a37" />
+
+## Requirements
+Vim 9.2.0083 +tabpanel
+
 ## Usage
 ```vim
 packadd vim-treepanel
+set stpl=2
 set tpl=%{%treepanel#tree%}
 ```
 
