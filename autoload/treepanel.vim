@@ -1,7 +1,6 @@
 vim9script
 
-# export var tree = ''
-var tree = ''
+export var tree = ''
 
 const CURSOR_TOP = 0
 const CURSOR_CURFILE = -1
