@@ -204,7 +204,7 @@ def CreateTree(d: any): string
   if scrollbar.visible
     scrollbar.width = 1
     const half = viewcount / 2
-    const top = min([filecount - viewcount, max([0, state.cursor - half])])
+    const top = sort([0, filecount - viewcount, state.cursor - half], 'n')[1]
     viewfiles = viewfiles[top : top + viewcount - 1]
     scrollbar.pos = viewcount * (top + half) / filecount
   endif
