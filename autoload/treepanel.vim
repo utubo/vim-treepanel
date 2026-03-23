@@ -20,15 +20,15 @@ const default = {
   maxheight: 0,
   newfile: '[No Name]',
   newfileicon: "\uea7f",
-  key_blur: ["q"],
+  key_blur: ['q'],
   key_open: ["\<CR>", 'l'],
   key_vsplit: ['v'],
   key_split: ['s'],
   key_parent: ["\<BS>", 'h'],
   key_search: ['/'],
   key_blursearch: ['/', "\<Tab>"],
-  key_bottom: ["G"],
-  key_top: ["g"],
+  key_bottom: ['G'],
+  key_top: ['g'],
 }
 
 var state = {
