@@ -40,6 +40,8 @@ var state = {
   search_focused: false,
   search: '',
   stpl_back: -1,
+  popup: 0,
+  timer: 0,
 }
 
 def SetupState()
@@ -279,7 +281,7 @@ def KeyHook(w: number, key: string): bool
     return false
   elseif state.search_focused && KeyHookSearch(key)
     return true
-  elseif key ==# "\<ESC>" || key == "\<C-c>" || key->AnyOf('key_blur')
+  elseif key ==# "\<ESC>" || key->AnyOf('key_blur')
     Blur()
   elseif key ==# 'k'
     if 0 < state.cursor
@@ -351,11 +353,25 @@ export def Focus()
   state.cursor = CURSOR_CURFILE
   state.search = ''
   state.search_focused = false
+  state.timer = timer_start(500, OnTimer, { repeat: -1 })
   Refresh()
+enddef
+
+def OnTimer(_: number)
+  if !state.focused
+    return
+  endif
+  if !popup_getpos(state.popup)->has_key('col')
+    Blur()
+  endif
 enddef
 
 def Blur()
   state.focused = false
+  if !!state.timer
+    timer_stop(state.timer)
+    state.timer = 0
+  endif
   if state.stpl_back !=# -1
     &stpl = state.stpl_back
     state.stpl_back = -1
