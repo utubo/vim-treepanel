@@ -39,6 +39,7 @@ var state = {
   focused: false,
   search_focused: false,
   search: '',
+  stpl_back: -1,
 }
 
 def SetupState()
@@ -341,6 +342,10 @@ def KeyHookSearch(key: string): bool
 enddef
 
 export def Focus()
+  if state.stpl_back ==# -1
+    state.stpl_back = &stpl
+  endif
+  set stpl=2
   state.focused = true
   state.popup = popup_create(' ', { opacity: 0, filter: KeyHook, mapping: false })
   state.cursor = CURSOR_CURFILE
@@ -351,6 +356,10 @@ enddef
 
 def Blur()
   state.focused = false
+  if state.stpl_back !=# -1
+    &stpl = state.stpl_back
+    state.stpl_back = -1
+  endif
   if !!state.popup
     popup_close(state.popup)
     state.popup = 0
