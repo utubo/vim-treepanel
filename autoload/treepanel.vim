@@ -3,7 +3,7 @@ vim9script
 export var tree = ''
 
 const CURSOR_TOP = 0
-const CURSOR_CURFILE = -1
+const CURSOR_CURFILE = -9999
 
 # helper
 export def Tree(): string
@@ -26,7 +26,7 @@ const default = {
   key_split: ['s'],
   key_parent: ["\<BS>", 'h'],
   key_search: ['/'],
-  key_blursearch: ['/', "\<Tab>"],
+  key_blursearch: ['/', "\<Tab>", "\<ESC>"],
   key_bottom: ['G'],
   key_top: ['g'],
 }
@@ -35,7 +35,7 @@ var state = {
   width: 20,
   diricon: default.diricon,
   dir: '',
-  cursor: -1,
+  cursor: CURSOR_CURFILE,
   focused: false,
   search_focused: false,
   search: '',
@@ -56,7 +56,9 @@ var cache = {
   dir: '',
   root: '',
   dirs: [],
+  showndirs: [],
   files: [],
+  minidx: 0,
   maxidx: 0,
 }
 # }}}
@@ -134,7 +136,13 @@ def GetDirInfo(dir: string): any
   # dirs
   const rel = dir[len(root) :]
   const dlm = stridx(rel, '\') !=# -1 ? '\' : '/'
-  cache.dirs = rel->split(dlm)
+  cache.dirs = []
+  var dirpath = root
+  for dirname in rel->split(dlm)
+    dirpath ..= dlm
+    dirpath ..= dirname
+    cache.dirs += [{ name: dirname, path: dirpath }]
+  endfor
 
   # files
   cache.files = (globpath(dir, '*', 1, 1) + globpath(dir, '.*', 1, 1))
@@ -158,20 +166,22 @@ def GetDirInfo(dir: string): any
   return cache
 enddef
 
-def SetCursor()
-enddef
-
 def CreateTree(d: any): string
   # output root
   var lines = [d.root->AlignRight()]
 
   # output dirs
   var indent = ' '
-  for dirname in d.dirs
-    lines += [$'{indent}{state.diricon}{dirname}'->AlignLeft()]
+  var dindex = - len(d.dirs)
+  for dir in d.dirs
+    const hi = state.cursor ==# dindex ? '%#Cursor#' : ''
+    lines += [hi .. $'{indent}{state.diricon}{dir.name}'->AlignLeft()]
     indent ..= ' '
+    dindex += 1
   endfor
   var dircount = len(lines)
+  cache.minidx = 1 - dircount
+  cache.showndirs = d.dirs
 
   # setup file list
   var viewfiles = d.files->copy()
@@ -183,10 +193,14 @@ def CreateTree(d: any): string
 
   if maxheight < dircount + filecount && 3 < dircount
     indent = ' '
+    var dir = d.dirs[-1]
+    const hi = state.cursor ==# -1 ? '%#Cursor#' : ''
     lines = [d.dir->fnamemodify(':h')->AlignRight(), elp]
-    lines += [$'{indent}{state.diricon}{d.dirs[-1]}'->AlignLeft()]
-    dircount = 3
+    lines += [hi .. $'{indent}{state.diricon}{dir.name}'->AlignLeft()]
     indent ..= ' '
+    dircount = 3
+    cache.showndirs = [dir]
+    cache.minidx = -1
   endif
 
   const curbuf = bufnr()
@@ -248,6 +262,7 @@ def Update()
   SetupState()
   tree = GetDirInfo(state.dir)->CreateTree()
   redrawtabpanel
+  g:a = cache # TODO
 enddef
 
 def OpenCurrentFile(refresh: bool = false)
@@ -284,7 +299,7 @@ def KeyHook(w: number, key: string): bool
   elseif key ==# "\<ESC>" || key->AnyOf('key_blur')
     Blur()
   elseif key ==# 'k'
-    if 0 < state.cursor
+    if cache.minidx < state.cursor
       state.cursor -= 1
       Update()
     endif
@@ -316,7 +331,7 @@ def KeyHook(w: number, key: string): bool
 enddef
 
 def KeyHookSearch(key: string): bool
-  if key->AnyOf('key_blursearch')
+  if key->AnyOf('key_blursearch') && state.search_focused
     state.search_focused = false
     Refresh()
     return true
@@ -384,7 +399,8 @@ def Blur()
 enddef
 
 def OpenSelected(cmd: string)
-  const p = cache.files[state.cursor].path
+  var target = state.cursor < 0 ? cache.showndirs : cache.files
+  const p = target[state.cursor].path
   if isdirectory(p)
     OpenDir(p)
   else
