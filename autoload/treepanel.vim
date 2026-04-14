@@ -231,10 +231,6 @@ def CreateTree(d: any): string
   for f in viewfiles
     f.icon = f.icon ?? GetIcon(f.name)
     lines += [$'{indent}{f.icon}{f.name}'->AlignLeft(scrollbar.width)->substitute('%', '%%', 'g')]
-    if f.name ==# '.git'
-      g:a = viewfiles
-      g:b = state.cursor
-    endif
     if state.cursor ==# f.index
       if state.focused && !state.search_focused
         lines[-1] = '%#Cursor#' .. lines[-1]
@@ -262,7 +258,6 @@ def Update()
   SetupState()
   tree = GetDirInfo(state.dir)->CreateTree()
   redrawtabpanel
-  g:a = cache # TODO
 enddef
 
 def OpenCurrentFile(refresh: bool = false)
